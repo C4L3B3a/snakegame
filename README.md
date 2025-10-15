@@ -135,7 +135,7 @@ Contributions are welcome! Please fork the repository, make your changes, and su
 ## What do you need to host the software
 
 - Personal server (To host the support portal and admin panel)
-- 
+- WinSCP to host the server
 
 By C4L
 :D
