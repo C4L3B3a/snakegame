@@ -3,11 +3,11 @@
 More of a developer kit for Python game developers.  
 Includes:
 
-- A demo Snake game (`snakegame/game.py`)
-- Crash detection and telemetry reporting (`snakegame/crash_detector.py`)
-- Auto-updater (`snakegame/updater.py`)
+- A demo Snake game (`snakegame/snakegame.py`)
+- Crash detection and telemetry reporting (`Function inside snakegame.py`)
+- Auto-updater (`Function inside snakegame.py`)
 - Admin panel with telemetry reciever and update pushing (`telemetry.php`)
-- Flask-based support portal (`support_portal/`)
+- Flask-based support portal (`support_portal/app.py`)
 
 ---
 
