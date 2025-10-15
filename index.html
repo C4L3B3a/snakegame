@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en-US"> <!-- Set language for accessibility and SEO -->
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <!-- You can add CSS or JS links here if needed -->
+    <!--<link rel="stylesheet" type="text/css" href="static/styles.css">-->
+</head>
+<body>
+
+    <!-- -------------------------------
+         VIEWER LOGIN FORM
+         Allows admins to log in and view telemetry.
+         ------------------------------- -->
+    <h3>Viewer Login</h3>
+    <form action="telemetry.php" method="POST">
+        <!-- Username input -->
+        <input type="text" name="user" placeholder="Login" required><br>
+
+        <!-- Password input -->
+        <input type="password" name="pass" placeholder="Password" required><br>
+
+        <!-- Submit button -->
+        <button type="submit">View Telemetry</button>
+    </form>
+
+    <hr> <!-- Optional separator -->
+
+    <!-- -------------------------------
+         UPLOAD NEW UPDATE FORM
+         Allows admins to upload a new game update for Windows or Linux.
+         ------------------------------- -->
+    <h3>Upload New Update</h3>
+    <form action="telemetry.php" method="POST" enctype="multipart/form-data">
+        <!-- Select OS for the update -->
+        OS:
+        <select name="os">
+            <option>Windows</option>
+            <option>Linux</option>
+        </select><br>
+
+        <!-- Version number for the update -->
+        Version: <input type="text" name="version" required><br>
+
+        <!-- ZIP file upload input -->
+        ZIP file: <input type="file" name="update_file" accept=".zip" required><br>
+
+        <!-- Submit button -->
+        <button type="submit" name="action" value="upload_update">Upload</button>
+    </form>
+<!-- By C4L -->
+</body>
+</html>

@@ -1,0 +1,35 @@
+# -------------------------------
+# SnakeGame Developer Kit Requirements
+# -------------------------------
+
+# GUI for the Snake game
+tk   # Standard Python GUI library; provides Tkinter and messagebox functionality.
+
+# HTTP requests for telemetry and auto-updater
+requests   # Simplifies sending GET/POST requests to servers (update check, telemetry).
+
+# Version comparison for auto-updater
+packaging   # Provides packaging.version.Version for safe version comparison.
+
+# Flask web server for the support portal
+Flask>=2.0.0   # Lightweight web framework for building the support portal.
+
+# User authentication for Flask portal
+Flask-Login>=0.6.2   # Handles user session management (login/logout).
+
+# Password hashing & security
+Werkzeug>=2.0.0   # Provides generate_password_hash and check_password_hash functions.
+
+# -------------------------------
+# Notes
+# -------------------------------
+# - 'tk' may need to be installed via system package manager on Linux:
+#   sudo apt install python3-tk
+# - All other packages can be installed via pip:
+#   pip install -r requirements.txt
+# - No additional dependencies are required for core Python modules:
+#   random, string, platform, time, secrets, traceback, webbrowser, os, zipfile, subprocess
+#   These are part of the Python standard library.
+# - Python 3.8+ recommended for compatibility.
+
+# By C4L

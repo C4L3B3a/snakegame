@@ -1,0 +1,10 @@
+{
+    "Windows": {
+        "version": "1.0.0",
+        "url": "http://localhost:8000/updates/test.zip"
+    },
+    "Linux": {
+        "version": "1.0.0",
+        "url": "http://localhost:8000/updates/SnakeGame_Linux_1.0.0.zip"
+    }
+}
