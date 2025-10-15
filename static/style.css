@@ -1,0 +1,94 @@
+/* -----------------------------
+   Global Styles
+   Applies to the whole page
+   ----------------------------- */
+body {
+    font-family: Arial, sans-serif; /* Clean, readable font */
+    background-color: #f0f2f5;      /* Light grey background for comfort */
+    margin: 20px;                    /* Space around page content */
+    color: #333;                     /* Default text color */
+}
+
+/* Headings */
+h3 {
+    color: #007bff; /* Blue headings for emphasis */
+    margin-bottom: 10px;
+}
+
+/* Input and select fields styling */
+input[type="text"],
+input[type="password"],
+input[type="file"],
+select,
+button,
+textarea {
+    display: block;      /* Stack vertically */
+    margin: 10px 0;      /* Space between elements */
+    padding: 8px;        /* Comfortable padding */
+    width: 300px;        /* Fixed width */
+    max-width: 100%;     /* Responsive for small screens */
+    box-sizing: border-box; /* Include padding in width */
+}
+
+/* Textarea specific styling */
+textarea {
+    height: 100px;       /* Taller input for descriptions */
+    resize: vertical;    /* Allow vertical resize */
+}
+
+/* Button styles */
+button {
+    background-color: #007bff; /* Primary theme color */
+    color: #fff;               /* White text */
+    border: none;              /* Remove default border */
+    cursor: pointer;           /* Pointer on hover */
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+/* Button hover effect */
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Form container spacing */
+form {
+    margin-bottom: 30px; /* Space between forms */
+}
+
+/* Optional separator styling */
+hr {
+    border: 0;
+    border-top: 1px solid #ddd; /* Light line */
+    margin: 20px 0;
+}
+
+/* Flash messages (optional for alerts) */
+.flash {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+}
+
+.flash.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.flash.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Links styling (if needed in the future) */
+a {
+    color: #007bff;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* By C4L */

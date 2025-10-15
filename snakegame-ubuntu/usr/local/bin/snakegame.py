@@ -21,12 +21,12 @@ __game__ = "SnakeGame"
 
 # URLs for telemetry server and website/support portal
 TELEMETRY_URL = "http://localhost:8000/telemetry.php"  # change to your server
-WEBSITE_URL = "http://localhost:5000/"  # change to your site (Support Portal)
+WEBSITE_URL = "http://127.0.0.1:5000/"  # change to your site (Support Portal)
 # Btw, the sites need to be working/up to actually redirect, otherwise, you will see 404 or simply "Site cannot be reached" or some similar stuff
 
 # Why IP difference in URLs?
 # - TELEMETRY_URL uses normal localhost
-# - WEBSITE_URL uses flask, which usually uses http://localhost:5000/ instead of http://localhost:8000/
+# - WEBSITE_URL uses flask, which usually uses http://127.0.0.1:5000/ instead of http://localhost:8000/
 
 # -------------------------------
 # UPDATE CHECKER

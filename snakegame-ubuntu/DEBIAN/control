@@ -1,0 +1,10 @@
+Package: snakegame-ubuntu
+Version: 1.0.0
+Section: games
+Priority: optional
+Architecture: all
+Depends: python3
+Maintainer: C4L <c4l.artworks@gmail.com>
+Description: Snake Game in Python
+ A simple snake game built on Python. Open source and easy to install.
+
