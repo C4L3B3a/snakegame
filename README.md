@@ -6,6 +6,7 @@ Includes:
 - A demo Snake game (`snakegame/game.py`)
 - Crash detection and telemetry reporting (`snakegame/crash_detector.py`)
 - Auto-updater (`snakegame/updater.py`)
+- Admin panel with telemetry reciever and update pushing (`telemetry.php`)
 - Flask-based support portal (`support_portal/`)
 
 ---
@@ -119,7 +120,7 @@ Then open your browser at `http://localhost:5000` to use the portal.
 
 ## Telemetry & Crash Reporting
 
-The game automatically detects crashes and can send **anonymous telemetry** to help improve the software.
+The game automatically detects crashes and offers to send **anonymous telemetry** to help improve the software.
 
 No personal information (IP, accounts, passwords) is collected.
 
@@ -130,6 +131,11 @@ No personal information (IP, accounts, passwords) is collected.
 Contributions are welcome! Please fork the repository, make your changes, and submit a pull request.
 
 ---
+
+## What do you need to host the software
+
+- Personal server (To host the support portal and admin panel)
+- 
 
 By C4L
 :D
