@@ -47,7 +47,7 @@ Steps:
 1. Make the main script executable:
 
 ```bash
-chmod +x snakegame/game.py
+chmod +x snakegame/snakegame.py
 ```
 
 2. Create folder structure for Debian package:
