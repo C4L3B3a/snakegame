@@ -1,6 +1,3 @@
-Sure! Here’s a polished, ready-to-use `README.md` for your SnakeGame Developer Kit project, incorporating installation, running, building, and contributing instructions:
-
-````markdown
 # SnakeGame Developer Kit
 
 More of a developer kit for Python game developers.  
@@ -56,27 +53,13 @@ chmod +x snakegame/game.py
 2. Create folder structure for Debian package:
 
 ```
-snakegame_1.0.0/
+snakegame/
 ├── DEBIAN/
 │   └── control
 ├── usr/
 │   └── local/
 │       └── bin/
 │           └── snakegame.py
-```
-
-* Example `control` file:
-
-```
-Package: snakegame
-Version: 1.0.0
-Section: games
-Priority: optional
-Architecture: all
-Depends: python3
-Maintainer: C4L <you@example.com>
-Description: Snake Game in Python
- A simple snake game built on Python. Open source and easy to install.
 ```
 
 3. Build the package:
