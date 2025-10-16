@@ -2,11 +2,12 @@
 # SnakeGame Developer Kit - Universal Build Workflow
 # ----------------------------------------------------------
 # This GitHub Actions workflow builds SnakeGame for:
-#   - Windows (x32, x64, x86) using PyInstaller
+#   - Windows (x64, x86) using PyInstaller
 #   - Linux (.deb, .rpm, .tar.gz)
 #
 # Optional Snap/Flatpak builds can be added later if desired.
 # Check snap/flatpak folders for more info.
+# x32 builds for Windows cannot be built unless using an older version of python (2024, or actually building it where an python x32 is installed.)
 # ==========================================================
 
 name: SnakeGame Universal Builder
@@ -17,7 +18,7 @@ on:
   workflow_dispatch:        # Allows manual runs from the GitHub Actions interface
 
 # ==========================================================
-# WINDOWS BUILDS (x32, x64, x86)
+# WINDOWS BUILDS (x64, x86)
 # ==========================================================
 jobs:
   build-windows:
@@ -25,7 +26,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        arch: [ "x32", "x64", "x86" ]  # All target architectures
+        arch: [ "x64", "x86" ]  # All target architectures
 
     steps:
       # Step 1: Checkout the repository code
@@ -166,7 +167,7 @@ jobs:
       - name: Install Snapcraft
         run: sudo snap install snapcraft --classic
       - name: Build Snap
-        run: snapcraft
+        run: snapcraft pack
       - name: Upload Snap artifact
         uses: actions/upload-artifact@v4
         with:
