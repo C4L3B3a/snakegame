@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ## Running the Game
 
 ```bash
-python3 snakegame/game.py
+python3 snakegame/snakegame.py
 ```
 
 ---
@@ -72,7 +72,7 @@ dpkg-deb --build snakegame_1.0.0
 4. Install and test:
 
 ```bash
-sudo dpkg -i snakegame_1.0.0.deb
+sudo dpkg -i snakegame.deb
 snakegame.py
 ```
 
