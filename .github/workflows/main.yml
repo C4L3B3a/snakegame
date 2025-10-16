@@ -157,4 +157,17 @@ jobs:
             snakegame_1.0.0_all.deb
             rpm/RPMS/noarch/*.rpm
             snakegame_1.0.0.tar.gz
+
+      build-snap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Snapcraft
+        run: sudo snap install snapcraft --classic
+      - name: Build Snap package
+        run: snapcraft
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snakegame-snap
+          path: ./*.snap
 # By C4L
