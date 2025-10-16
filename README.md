@@ -62,6 +62,7 @@ snakegame/
 │       └── bin/
 │           └── snakegame.py
 ```
+-# Note: When you update the main snakegame.py, be sure to update snakegame_linux/usr/local/bin/snakegame.py too!
 
 3. Build the package:
 
