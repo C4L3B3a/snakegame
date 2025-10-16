@@ -176,3 +176,6 @@ Anonymous telemetry is collected automatically. No personal information is store
 ---
 
 By C4L
+
+This project took so much time, so much hard work and hours that I could be studying to pass in my tests or train in guitar, wasted in this project. So please, if you want to support, help the project by creating issues, sending telemtry (so I can debug), staring the project, watching the project, sharing, chatting in our community, and make this spread!
+Thanks!
