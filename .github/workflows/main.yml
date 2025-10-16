@@ -2,11 +2,12 @@
 # SnakeGame Developer Kit - Universal Build Workflow
 # ----------------------------------------------------------
 # This GitHub Actions workflow builds SnakeGame for:
-#   - Windows (x32, x64, x86) using PyInstaller
+#   - Windows (x64, x86) using PyInstaller
 #   - Linux (.deb, .rpm, .tar.gz)
 #
 # Optional Snap/Flatpak builds can be added later if desired.
 # Check snap/flatpak folders for more info.
+# x32 builds for Windows cannot be built unless using an older version of python (2024, or actually building it where an python x32 is installed.)
 # ==========================================================
 
 name: SnakeGame Universal Builder
@@ -17,7 +18,7 @@ on:
   workflow_dispatch:        # Allows manual runs from the GitHub Actions interface
 
 # ==========================================================
-# WINDOWS BUILDS (x32, x64, x86)
+# WINDOWS BUILDS (x64, x86)
 # ==========================================================
 jobs:
   build-windows:
@@ -25,7 +26,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        arch: [ "x32", "x64", "x86" ]  # All target architectures
+        arch: [ "x64", "x86" ]  # All target architectures
 
     steps:
       # Step 1: Checkout the repository code
@@ -157,17 +158,37 @@ jobs:
             snakegame_1.0.0_all.deb
             rpm/RPMS/noarch/*.rpm
             snakegame_1.0.0.tar.gz
-
-      build-snap:
+            
+  build-snap:
+    name: Build Snap package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install Snapcraft
         run: sudo snap install snapcraft --classic
-      - name: Build Snap package
-        run: snapcraft
-      - uses: actions/upload-artifact@v4
+      - name: Build Snap
+        run: snapcraft pack
+      - name: Upload Snap artifact
+        uses: actions/upload-artifact@v4
         with:
           name: snakegame-snap
           path: ./*.snap
+
+  build-flatpak:
+    name: Build Flatpak package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Flatpak tools
+        run: sudo apt install -y flatpak flatpak-builder
+      - name: Build Flatpak
+        run: |
+          flatpak-builder build-dir snakegame.flatpak.yaml --force-clean
+          flatpak build-bundle repo snakegame.flatpak com.c4l.SnakeGame 1.0.0
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snakegame-flatpak
+          path: snakegame.flatpak
+
 # By C4L
