@@ -96,7 +96,7 @@ venv\Scripts\activate
 2. Build the executable:
 
 ```bash
-pyinstaller --onefile --icon=snake.ico --noconsole snakegame/game.py
+pyinstaller --onefile --icon=icon.ico --noconsole snakegame/snakegame.py
 ```
 
 3. The `.exe` will appear in the `dist/` folder. You can distribute it directly.
