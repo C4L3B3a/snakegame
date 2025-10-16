@@ -1,0 +1,14 @@
+app-id: org.snakegame.DeveloperKit
+runtime: org.freedesktop.Platform
+runtime-version: '22.08'
+sdk: org.freedesktop.Sdk
+command: snakegame
+modules:
+  - name: snakegame
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 snakegame.py /app/bin/snakegame
+      - if [ -d "support_portal" ]; then cp -r support_portal /app/; fi
+    sources:
+      - type: dir
+        path: .

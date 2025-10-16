@@ -2,7 +2,7 @@ name: snakegame
 version: '1.0.0'
 summary: SnakeGame
 description: |
-    More of a developer kit for Python game developers. A simple snake game built on Python. Open source and easy to install.
+    More of a developer kit for Python game developers. A simple snake game built on Python. Open source and easy to install. Includes telemetry, auto-updater, and support portal.
 confinement: strict
 base: core22
 apps:

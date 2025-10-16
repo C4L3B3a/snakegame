@@ -7,4 +7,5 @@ Depends: python3
 Maintainer: C4L <c4l.artworks@gmail.com>
 Description: More of a developer kit for Python game developers.
  A simple snake game built on Python. Open source and easy to install.
+ Includes telemetry, auto-updater, and support portal.
 
