@@ -95,90 +95,86 @@ jobs:
           name: snakegame-macos-${{ matrix.arch }}
           path: dist/SnakeGame_mac_${{ matrix.arch }}
 
-# ==========================================================
-# LINUX BUILDS
-# ==========================================================
-  build-linux:
-    name: Build Linux Packages
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [ "x86_64", "arm64" ]  # Build for x86_64 and ARM64 Linux
+# -----------------------------
+# LINUX BUILDS (Fixed)
+# -----------------------------
+build-linux:
+  name: Build Linux Packages
+  runs-on: ubuntu-latest
+  strategy:
+    matrix:
+      arch: [ "x86_64", "arm64" ]
 
-    steps:
-      - uses: actions/checkout@v4
+  steps:
+    - uses: actions/checkout@v4
 
-      # Setup environment and dependencies
-      - name: Setup environment
-        run: |
-          sudo apt update
-          sudo apt install -y python3 python3-setuptools python3-all fakeroot dpkg-dev rpm tar
-          python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
+    # Setup environment
+    - name: Setup environment
+      run: |
+        sudo apt update
+        sudo apt install -y python3 python3-setuptools python3-all fakeroot dpkg-dev rpm tar
+        python3 -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      # -----------------------------
-      # Build .deb package
-      # -----------------------------
-      - name: Build .deb package
-        run: |
-          mkdir -p build/usr/local/bin
-          # Copy existing Python file from repo
-          cp snakegame.py build/usr/local/bin/snakegame
-          chmod +x build/usr/local/bin/snakegame
-          # Build .deb using existing structure
-          dpkg-deb --build build snakegame_1.0.0_${{ matrix.arch }}.deb
+    # -----------------------------
+    # Build .deb package
+    # -----------------------------
+    - name: Build .deb package
+      run: |
+        mkdir -p build/usr/local/bin
+        cp snakegame.py build/usr/local/bin/snakegame
+        chmod +x build/usr/local/bin/snakegame
+        # Copy control file from repo
+        mkdir -p build/DEBIAN
+        cp DEBIAN/control build/DEBIAN/
+        dpkg-deb --build build snakegame_1.0.0_${{ matrix.arch }}.deb
 
-      # -----------------------------
-      # Build .rpm package
-      # -----------------------------
-      - name: Build .rpm package
-        run: |
-          mkdir -p rpm/BUILD rpm/RPMS rpm/SOURCES rpm/SPECS rpm/SRPMS
-          mkdir -p rpm/SOURCES/snakegame-1.0.0
-          # Copy existing Python file only (support portal excluded)
-          cp snakegame.py rpm/SOURCES/snakegame-1.0.0/
-          # Create tarball source for rpmbuild
-          tar czvf rpm/SOURCES/snakegame-1.0.0.tar.gz -C rpm/SOURCES snakegame-1.0.0
-          # Use spec file already present in repo
-          rpmbuild --define "_topdir $(pwd)/rpm" -bb rpm/SPECS/snakegame.spec
+    # -----------------------------
+    # Build .rpm package
+    # -----------------------------
+    - name: Build .rpm package
+      run: |
+        mkdir -p rpm/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+        mkdir -p rpm/SOURCES/snakegame-1.0.0
+        cp snakegame.py rpm/SOURCES/snakegame-1.0.0/
+        tar czvf rpm/SOURCES/snakegame-1.0.0.tar.gz -C rpm/SOURCES snakegame-1.0.0
+        # Use existing spec file
+        rpmbuild --define "_topdir $(pwd)/rpm" -bb rpm/SPECS/snakegame.spec
 
-      # -----------------------------
-      # Build .tar.gz archive
-      # -----------------------------
-      - name: Build .tar.gz archive
-        run: |
-          mkdir -p tarball/snakegame
-          cp snakegame.py tarball/snakegame/
-          tar czf snakegame_1.0.0_${{ matrix.arch }}.tar.gz -C tarball snakegame
+    # -----------------------------
+    # Build .tar.gz archive
+    # -----------------------------
+    - name: Build .tar.gz archive
+      run: |
+        mkdir -p tarball/snakegame
+        cp snakegame.py tarball/snakegame/
+        tar czf snakegame_1.0.0_${{ matrix.arch }}.tar.gz -C tarball snakegame
 
-      # -----------------------------
-      # Upload Linux artifacts
-      # -----------------------------
-      - name: Upload Linux artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: snakegame-linux-${{ matrix.arch }}
-          path: |
-            snakegame_1.0.0_${{ matrix.arch }}.deb
-            rpm/RPMS/noarch/*.rpm
-            snakegame_1.0.0_${{ matrix.arch }}.tar.gz
+    # -----------------------------
+    # Upload artifacts
+    # -----------------------------
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: snakegame-linux-${{ matrix.arch }}
+        path: |
+          snakegame_1.0.0_${{ matrix.arch }}.deb
+          rpm/RPMS/noarch/*.rpm
+          snakegame_1.0.0_${{ matrix.arch }}.tar.gz
 
 # ==========================================================
 # Snap build (optional)
 # ==========================================================
   build-snap:
-    name: Build Snap package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Snapcraft
         run: sudo snap install snapcraft --classic
-
-      # Build snap from repo root
       - name: Build Snap
-        run: snapcraft pack --directory=.
-
+        run: |
+          cd $GITHUB_WORKSPACE
+          snapcraft pack
       - uses: actions/upload-artifact@v4
         with:
           name: snakegame-snap
@@ -188,23 +184,20 @@ jobs:
 # Flatpak build (optional)
 # ==========================================================
   build-flatpak:
-    name: Build Flatpak package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Flatpak tools
         run: sudo apt install -y flatpak flatpak-builder
-
-      # Build flatpak using existing YAML file
       - name: Build Flatpak
         run: |
+          cd $GITHUB_WORKSPACE
           flatpak-builder --force-clean build-dir snakegame.flatpak.yaml
           flatpak build-bundle repo snakegame.flatpak com.c4l.SnakeGame 1.0.0
-
       - uses: actions/upload-artifact@v4
         with:
           name: snakegame-flatpak
           path: snakegame.flatpak
+
 
 # By C4L
