@@ -151,14 +151,18 @@ jobs:
   # SNAP BUILD (optional, only if snapcraft.yaml exists)
   # ==========================================================
   build-snap:
-    if: exists('snapcraft.yaml')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install Snapcraft
         run: sudo snap install snapcraft --classic
-      - name: Build Snap
-        run: snapcraft pack
+      - name: Build Snap (if file exists)
+        run: |
+          if [ -f snapcraft.yaml ]; then
+            snapcraft pack
+          else
+            echo "snapcraft.yaml not found — skipping Snap build"
+          fi  
       - uses: actions/upload-artifact@v4
         with:
           name: snakegame-snap
@@ -168,18 +172,21 @@ jobs:
   # FLATPAK BUILD (optional, only if snakegame.flatpak.yaml exists)
   # ==========================================================
   build-flatpak:
-    if: exists('snakegame.flatpak.yaml')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install Flatpak tools
         run: sudo apt install -y flatpak flatpak-builder
-      - name: Build Flatpak
+      - name: Build Flatpak (if file exists)
         run: |
-          flatpak-builder --force-clean build-dir snakegame.flatpak.yaml
-          flatpak build-bundle repo snakegame.flatpak com.c4l.SnakeGame 1.0.0
+          if [ -f snakegame.flatpak.yaml ]; then
+            flatpak-builder --force-clean build-dir snakegame.flatpak.yaml
+            flatpak build-bundle repo snakegame.flatpak com.c4l.SnakeGame 1.0.0
+          else
+            echo "snakegame.flatpak.yaml not found — skipping Flatpak build"
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: snakegame-flatpak
-          path: snakegame.flatpak
+          path: snakegame.flatpak || true
 # By C4L
