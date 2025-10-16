@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ## Running the Game
 
 ```bash
-python3 snakegame/snakegame.py
+python3 snakegame.py
 ```
 
 ---
@@ -48,13 +48,13 @@ Steps:
 1. Make the main script executable:
 
 ```bash
-chmod +x snakegame/snakegame.py
+chmod +x snakegame.py
 ```
 
 2. Create folder structure for Debian package:
 
 ```
-snakegame/
+snakegame-linux/
 ├── DEBIAN/
 │   └── control
 ├── usr/
@@ -67,13 +67,13 @@ snakegame/
 3. Build the package:
 
 ```bash
-dpkg-deb --build snakegame_1.0.0
+dpkg-deb --build snakegame-linux
 ```
 
 4. Install and test:
 
 ```bash
-sudo dpkg -i snakegame.deb
+sudo dpkg -i snakegame-linux.deb
 snakegame.py
 ```
 
@@ -97,12 +97,24 @@ venv\Scripts\activate
 2. Build the executable:
 
 ```bash
-pyinstaller --onefile --icon=icon.ico --noconsole snakegame/snakegame.py
+pyinstaller --onefile --icon=icon.ico --noconsole snakegame.py
 ```
 
 3. The `.exe` will appear in the `dist/` folder. You can distribute it directly.
 
 ---
+
+## Admin Panel
+
+Use the admin panel to see the telemetries sent or push updates via internet.
+
+Start a local server:
+
+```bash
+python3 -m http.server 8000
+```
+
+To stop the server, press `Ctrl+C` on the terminal/cmd.
 
 ## Support Portal
 
