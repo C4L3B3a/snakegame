@@ -2,7 +2,8 @@
 # SnakeGame Developer Kit - Automated Release Workflow
 # ----------------------------------------------------------
 # Triggered by Git tags (v1.0.0, v1.0.1, ...)
-# Builds artifacts and publishes them automatically to GitHub Releases
+# Builds artifacts for Windows, macOS, Linux, Snap, Flatpak
+# and automatically publishes them to GitHub Releases
 # ==========================================================
 
 name: SnakeGame Release Builder
@@ -10,36 +11,45 @@ name: SnakeGame Release Builder
 on:
   push:
     tags:
-      - 'v*.*.*'  # Trigger only on version tags like v1.0.0
+      - 'v*.*.*'  # Trigger on version tags like v1.0.0
 
 jobs:
-  release:
-    name: Build and Release SnakeGame
+  # ==========================================================
+  # BUILD ARTIFACTS JOB
+  # ==========================================================
+  build-artifacts:
+    name: Build Artifacts
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        arch: [x64, x86, arm64]
+        os: [windows-latest, macos-latest, ubuntu-latest]  # Target OS
+        arch: [x64, x86, arm64]                             # Target architectures
     steps:
-      # Checkout the repo
+      # -----------------------------
+      # Checkout code
+      # -----------------------------
       - uses: actions/checkout@v4
 
+      # -----------------------------
       # Setup Python
+      # -----------------------------
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
+      # -----------------------------
       # Install dependencies
+      # -----------------------------
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
 
-      # -----------------------------
-      # Windows build
-      # -----------------------------
+      # ==========================================================
+      # WINDOWS BUILD
+      # ==========================================================
       - name: Build Windows Executable
         if: matrix.os == 'windows-latest'
         run: pyinstaller --onefile --windowed snakegame.py --name SnakeGame_${{ matrix.arch }}
@@ -50,9 +60,9 @@ jobs:
           name: SnakeGame_windows_${{ matrix.arch }}
           path: dist/SnakeGame_${{ matrix.arch }}.exe
 
-      # -----------------------------
-      # macOS build
-      # -----------------------------
+      # ==========================================================
+      # MACOS BUILD
+      # ==========================================================
       - name: Build macOS Executable
         if: matrix.os == 'macos-latest'
         run: pyinstaller --onefile --windowed snakegame.py --name SnakeGame_mac_${{ matrix.arch }}
@@ -63,28 +73,33 @@ jobs:
           name: SnakeGame_macos_${{ matrix.arch }}
           path: dist/SnakeGame_mac_${{ matrix.arch }}
 
-      # -----------------------------
-      # Linux build
-      # -----------------------------
-      - name: Setup Linux environment
+      # ==========================================================
+      # LINUX BUILD
+      # ==========================================================
+      - name: Setup Linux Environment
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt update
-          sudo apt install -y python3 python3-setuptools python3-all fakeroot dpkg-dev rpm tar
+          sudo apt install -y python3 python3-setuptools python3-all fakeroot dpkg-dev rpm tar snapcraft flatpak flatpak-builder
           python3 -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build .deb (Linux)
+      # -----------------------------
+      # Build .deb
+      # -----------------------------
+      - name: Build .deb Package
         if: matrix.os == 'ubuntu-latest'
         run: |
-          mkdir -p build/usr/local/bin
+          mkdir -p build/usr/local/bin build/DEBIAN
           cp snakegame.py build/usr/local/bin/snakegame
           chmod +x build/usr/local/bin/snakegame
-          mkdir -p build/DEBIAN
           cp DEBIAN/control build/DEBIAN/
           dpkg-deb --build build snakegame_1.0.0_${{ matrix.arch }}.deb
 
-      - name: Build .rpm (Linux)
+      # -----------------------------
+      # Build .rpm
+      # -----------------------------
+      - name: Build .rpm Package
         if: matrix.os == 'ubuntu-latest'
         run: |
           mkdir -p rpm/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
@@ -93,37 +108,64 @@ jobs:
           tar czvf rpm/SOURCES/snakegame-1.0.0.tar.gz -C rpm/SOURCES snakegame-1.0.0
           rpmbuild --define "_topdir $(pwd)/rpm" -bb rpm/SPECS/snakegame.spec
 
-      - name: Build .tar.gz (Linux)
+      # -----------------------------
+      # Build .tar.gz
+      # -----------------------------
+      - name: Build .tar.gz Archive
         if: matrix.os == 'ubuntu-latest'
         run: |
           mkdir -p tarball/snakegame
           cp snakegame.py tarball/snakegame/
           tar czf snakegame_1.0.0_${{ matrix.arch }}.tar.gz -C tarball snakegame
 
-      - name: Upload Linux Artifacts
+      # -----------------------------
+      # Build Snap package
+      # -----------------------------
+      - name: Build Snap Package
         if: matrix.os == 'ubuntu-latest'
+        run: |
+          snapcraft pack
+
+      # -----------------------------
+      # Build Flatpak bundle
+      # -----------------------------
+      - name: Build Flatpak Bundle
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          flatpak-builder --force-clean build-dir snakegame.flatpak.yaml
+          flatpak build-bundle repo snakegame.flatpak com.c4l.SnakeGame 1.0.0
+
+      # -----------------------------
+      # Upload Linux/Snap/Flatpak artifacts
+      # -----------------------------
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SnakeGame_linux_${{ matrix.arch }}
+          name: SnakeGame_${{ matrix.os }}_${{ matrix.arch }}
           path: |
             snakegame_1.0.0_${{ matrix.arch }}.deb
             rpm/RPMS/noarch/*.rpm
             snakegame_1.0.0_${{ matrix.arch }}.tar.gz
+            *.snap
+            snakegame.flatpak
 
-  # -----------------------------
-  # Publish GitHub Release
-  # -----------------------------
+  # ==========================================================
+  # PUBLISH RELEASE JOB
+  # ==========================================================
   publish-release:
-    name: Create GitHub Release
-    needs: release
+    name: Publish GitHub Release
+    needs: build-artifacts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download artifacts from previous job
+
+      # Download artifacts from build-artifacts job
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
+      # Create GitHub Release automatically
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -132,7 +174,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload all artifacts to release
+      # Upload all artifacts to the release
+      - name: Upload Artifacts to Release
         uses: softprops/action-gh-release@v1
         with:
           files: artifacts/**/*
