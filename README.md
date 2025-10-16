@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ## Running the Game
 
 ```bash
-python snakegame/game.py
+python3 snakegame/game.py
 ```
 
 ---
