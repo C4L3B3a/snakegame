@@ -137,5 +137,11 @@ Contributions are welcome! Please fork the repository, make your changes, and su
 - Personal server (To host the support portal and admin panel)
 - WinSCP to host the server
 
+## Recommended actions
+- For logins: Use random usernames/password generators
+- Build an encrypted system
+
+I will update this repo more soon!
+
 By C4L
 :D
