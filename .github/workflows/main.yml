@@ -1,119 +1,124 @@
 # ==========================================================
 # SnakeGame Developer Kit - Universal Build Workflow
 # ----------------------------------------------------------
-# This GitHub Actions workflow builds SnakeGame for:
-#   - Windows (x64, x86) using PyInstaller
-#   - Linux (.deb, .rpm, .tar.gz)
-#
-# Optional Snap/Flatpak builds can be added later if desired.
-# Check snap/flatpak folders for more info.
-# x32 builds for Windows cannot be built unless using an older version of python (2024, or actually building it where an python x32 is installed.)
+# Builds SnakeGame for:
+#   - Windows (x64, x86) via PyInstaller
+#   - macOS (x64, ARM64) via PyInstaller
+#   - Linux (.deb, .rpm, .tar.gz, ARM64)
+# Optional: Snap/Flatpak (manual publishing)
+# Notes:
+#   - Windows x32 requires a Python x32 installation
+#   - macOS builds require Mac runners (GitHub-hosted)
+#   - ARM builds may require cross-compilation or ARM runners
 # ==========================================================
 
 name: SnakeGame Universal Builder
 
 on:
   push:
-    branches: [ "main" ]   # Runs automatically on pushes to the main branch
-  workflow_dispatch:        # Allows manual runs from the GitHub Actions interface
+    branches: [ "main" ]
+  workflow_dispatch:
 
 # ==========================================================
-# WINDOWS BUILDS (x64, x86)
+# WINDOWS BUILDS
 # ==========================================================
 jobs:
   build-windows:
-    name: Build for Windows (${{ matrix.arch }})
+    name: Build Windows (${{ matrix.arch }})
     runs-on: windows-latest
     strategy:
       matrix:
-        arch: [ "x64", "x86" ]  # All target architectures
+        arch: [ "x64", "x86" ]  # x64 (most common), x86 (older / optional)
 
     steps:
-      # Step 1: Checkout the repository code
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # Step 2: Set up Python for the selected architecture
+      - uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           architecture: ${{ matrix.arch }}
-
-      # Step 3: Install all project dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
-
-      # Step 4: Build the Windows executable using PyInstaller
-      - name: Build Windows Executable
-        run: |
-          pyinstaller --onefile --windowed snakegame.py --name SnakeGame_${{ matrix.arch }}
-
-      # Step 5: Upload the generated executable as a workflow artifact
+      - name: Build Executable
+        run: pyinstaller --onefile --windowed snakegame.py --name SnakeGame_${{ matrix.arch }}
       - name: Upload Executable
         uses: actions/upload-artifact@v4
         with:
-          name: SnakeGame-${{ matrix.arch }}
+          name: snakegame-windows-${{ matrix.arch }}
           path: dist/SnakeGame_${{ matrix.arch }}.exe
 
 # ==========================================================
-# LINUX BUILDS (.deb, .rpm, .tar.gz)
+# macOS BUILDS
 # ==========================================================
-  build-linux:
-    name: Build for Linux Packages
-    runs-on: ubuntu-latest
+  build-macos:
+    name: Build macOS (${{ matrix.arch }})
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [ "x64", "arm64" ]  # Intel & Apple Silicon
 
     steps:
-      # Step 1: Checkout the repository code
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+      - name: Build macOS Executable
+        run: pyinstaller --onefile --windowed snakegame.py --name SnakeGame_mac_${{ matrix.arch }}
+      - name: Upload Executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: snakegame-macos-${{ matrix.arch }}
+          path: dist/SnakeGame_mac_${{ matrix.arch }}
 
-      # Step 2: Install required build tools and Python dependencies
+# ==========================================================
+# LINUX BUILDS
+# ==========================================================
+  build-linux:
+    name: Build Linux Packages
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ "x86_64", "arm64" ]  # Intel/AMD & ARM (e.g., Raspberry Pi)
+
+    steps:
+      - uses: actions/checkout@v4
       - name: Setup environment
         run: |
           sudo apt update
           sudo apt install -y python3 python3-setuptools python3-all fakeroot dpkg-dev rpm tar
           pip install -r requirements.txt
-
-      # Step 3: Build a .deb (Debian/Ubuntu) package
       - name: Build .deb package
         run: |
-          mkdir -p build/DEBIAN
-          mkdir -p build/usr/local/bin
-          mkdir -p build/usr/share/doc/snakegame
-
-          # Copy the main script
+          mkdir -p build/DEBIAN build/usr/local/bin build/usr/share/doc/snakegame
           cp snakegame.py build/usr/local/bin/snakegame
           chmod +x build/usr/local/bin/snakegame
-
-          # Create the control file for Debian packaging
           cat <<EOF > build/DEBIAN/control
           Package: snakegame
           Version: 1.0.0
           Section: games
           Priority: optional
-          Architecture: all
+          Architecture: ${{ matrix.arch }}
           Depends: python3
           Maintainer: C4L <contact@example.com>
           Description: SnakeGame Developer Kit
            Python-based developer toolkit for creating games with telemetry, updater, and support portal.
           EOF
-
-          # Build the .deb file
-          dpkg-deb --build build snakegame_1.0.0_all.deb
-
-      # Step 4: Build an .rpm (Fedora/openSUSE/CentOS) package
+          dpkg-deb --build build snakegame_1.0.0_${{ matrix.arch }}.deb
       - name: Build .rpm package
         run: |
           mkdir -p rpm/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-
-          # Create source archive
-          tar czvf rpm/SOURCES/snakegame-1.0.0.tar.gz snakegame.py
-
-          # Define the RPM spec file
+          mkdir -p rpm/SOURCES/snakegame-1.0.0
+          cp snakegame.py rpm/SOURCES/snakegame-1.0.0/
+          tar czvf rpm/SOURCES/snakegame-1.0.0.tar.gz -C rpm/SOURCES snakegame-1.0.0
           cat <<EOF > rpm/SPECS/snakegame.spec
           Name: snakegame
           Version: 1.0.0
@@ -125,7 +130,7 @@ jobs:
           Requires: python3
 
           %description
-          A developer kit for Python game developers. Includes telemetry, auto-updater, and support portal.
+          Python developer toolkit with telemetry, updater, and support portal.
 
           %install
           mkdir -p %{buildroot}/usr/local/bin
@@ -135,30 +140,25 @@ jobs:
           %files
           /usr/local/bin/snakegame
           EOF
-
-          # Build the .rpm file
           rpmbuild --define "_topdir $(pwd)/rpm" -bb rpm/SPECS/snakegame.spec
-
-      # Step 5: Build a generic .tar.gz archive
-      - name: Build .tar.gz package
+      - name: Build .tar.gz archive
         run: |
           mkdir -p tarball/snakegame
           cp snakegame.py tarball/snakegame/
-          if [ -d "support_portal" ]; then
-            cp -r support_portal tarball/snakegame/
-          fi
-          tar czf snakegame_1.0.0.tar.gz -C tarball snakegame
-
-      # Step 6: Upload all Linux artifacts
+          if [ -d "support_portal" ]; then cp -r support_portal tarball/snakegame/; fi
+          tar czf snakegame_1.0.0_${{ matrix.arch }}.tar.gz -C tarball snakegame
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: snakegame-linux
+          name: snakegame-linux-${{ matrix.arch }}
           path: |
-            snakegame_1.0.0_all.deb
+            snakegame_1.0.0_${{ matrix.arch }}.deb
             rpm/RPMS/noarch/*.rpm
-            snakegame_1.0.0.tar.gz
-            
+            snakegame_1.0.0_${{ matrix.arch }}.tar.gz
+
+# ==========================================================
+# Snap build (optional)
+# ==========================================================
   build-snap:
     name: Build Snap package
     runs-on: ubuntu-latest
@@ -168,12 +168,14 @@ jobs:
         run: sudo snap install snapcraft --classic
       - name: Build Snap
         run: snapcraft pack
-      - name: Upload Snap artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: snakegame-snap
           path: ./*.snap
 
+# ==========================================================
+# Flatpak build (optional)
+# ==========================================================
   build-flatpak:
     name: Build Flatpak package
     runs-on: ubuntu-latest
@@ -185,8 +187,7 @@ jobs:
         run: |
           flatpak-builder build-dir snakegame.flatpak.yaml --force-clean
           flatpak build-bundle repo snakegame.flatpak com.c4l.SnakeGame 1.0.0
-      - name: Upload Flatpak artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: snakegame-flatpak
           path: snakegame.flatpak

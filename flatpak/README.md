@@ -8,34 +8,6 @@ Install Flatpak tooling:
 sudo apt install flatpak flatpak-builder
 ```
 
-### Folder structure:
-
-Create a manifest file: **`snakegame.flatpak.yaml`**
-
-```yaml
-id: com.c4l.SnakeGame
-runtime: org.freedesktop.Platform
-runtime-version: '22.08'
-sdk: org.freedesktop.Sdk
-command: snakegame
-finish-args:
-  - --share=network
-  - --share=ipc
-  - --device=dri
-  - --socket=x11
-  - --socket=wayland
-  - --filesystem=home
-
-modules:
-  - name: snakegame
-    buildsystem: simple
-    build-commands:
-      - install -D snakegame.py /app/bin/snakegame
-    sources:
-      - type: dir
-        path: .
-```
-
 ### Build:
 
 ```bash
