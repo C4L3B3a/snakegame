@@ -1,0 +1,140 @@
+# ==========================================================
+# SnakeGame Developer Kit - Automated Release Workflow
+# ----------------------------------------------------------
+# Triggered by Git tags (v1.0.0, v1.0.1, ...)
+# Builds artifacts and publishes them automatically to GitHub Releases
+# ==========================================================
+
+name: SnakeGame Release Builder
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger only on version tags like v1.0.0
+
+jobs:
+  release:
+    name: Build and Release SnakeGame
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        arch: [x64, x86, arm64]
+    steps:
+      # Checkout the repo
+      - uses: actions/checkout@v4
+
+      # Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      # -----------------------------
+      # Windows build
+      # -----------------------------
+      - name: Build Windows Executable
+        if: matrix.os == 'windows-latest'
+        run: pyinstaller --onefile --windowed snakegame.py --name SnakeGame_${{ matrix.arch }}
+      - name: Upload Windows Artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SnakeGame_windows_${{ matrix.arch }}
+          path: dist/SnakeGame_${{ matrix.arch }}.exe
+
+      # -----------------------------
+      # macOS build
+      # -----------------------------
+      - name: Build macOS Executable
+        if: matrix.os == 'macos-latest'
+        run: pyinstaller --onefile --windowed snakegame.py --name SnakeGame_mac_${{ matrix.arch }}
+      - name: Upload macOS Artifact
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SnakeGame_macos_${{ matrix.arch }}
+          path: dist/SnakeGame_mac_${{ matrix.arch }}
+
+      # -----------------------------
+      # Linux build
+      # -----------------------------
+      - name: Setup Linux environment
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install -y python3 python3-setuptools python3-all fakeroot dpkg-dev rpm tar
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build .deb (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p build/usr/local/bin
+          cp snakegame.py build/usr/local/bin/snakegame
+          chmod +x build/usr/local/bin/snakegame
+          mkdir -p build/DEBIAN
+          cp DEBIAN/control build/DEBIAN/
+          dpkg-deb --build build snakegame_1.0.0_${{ matrix.arch }}.deb
+
+      - name: Build .rpm (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p rpm/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          mkdir -p rpm/SOURCES/snakegame-1.0.0
+          cp snakegame.py rpm/SOURCES/snakegame-1.0.0/
+          tar czvf rpm/SOURCES/snakegame-1.0.0.tar.gz -C rpm/SOURCES snakegame-1.0.0
+          rpmbuild --define "_topdir $(pwd)/rpm" -bb rpm/SPECS/snakegame.spec
+
+      - name: Build .tar.gz (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p tarball/snakegame
+          cp snakegame.py tarball/snakegame/
+          tar czf snakegame_1.0.0_${{ matrix.arch }}.tar.gz -C tarball snakegame
+
+      - name: Upload Linux Artifacts
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SnakeGame_linux_${{ matrix.arch }}
+          path: |
+            snakegame_1.0.0_${{ matrix.arch }}.deb
+            rpm/RPMS/noarch/*.rpm
+            snakegame_1.0.0_${{ matrix.arch }}.tar.gz
+
+  # -----------------------------
+  # Publish GitHub Release
+  # -----------------------------
+  publish-release:
+    name: Create GitHub Release
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifacts from previous job
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload all artifacts to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*
+
+# By C4L
