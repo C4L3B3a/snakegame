@@ -1,28 +1,27 @@
 # SnakeGame Developer Kit
 
 More of a developer kit for Python game developers.
+
 Includes:
 
-- A demo Snake game (`snakegame/snakegame.py`)
-- Crash detection and telemetry reporting (`Function inside snakegame.py`)
-- Auto-updater (`Function inside snakegame.py`)
-- Admin panel with telemetry reciever and update pushing (`telemetry.php`)
-- Flask-based support portal (`support_portal/app.py`)
+* A demo Snake game (`snakegame.py`)
+* Crash detection and telemetry reporting
+* Auto-updater
+* Admin panel (`telemetry.php`)
+* Flask-based support portal (`support_portal/app.py`)
 
 ---
 
 ## Installation
-
-Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/C4L3B3a/snakegame.git
 cd snakegame
 python3 -m venv venv
 source venv/bin/activate  # Linux/macOS
-# On Windows: venv\Scripts\activate
+# Windows: venv\Scripts\activate
 pip install -r requirements.txt
-````
+```
 
 ---
 
@@ -34,131 +33,120 @@ python3 snakegame.py
 
 ---
 
-## Building / Compiling
-
-### Linux (.deb)
-
-Dependencies:
-
-* Python 3
-* `dpkg-deb` (Debian/Ubuntu)
-
-Steps:
-
-1. Make the main script executable:
-
-```bash
-chmod +x snakegame.py
-```
-
-2. Create folder structure for Debian package:
-
-```
-snakegame-linux/
-├── DEBIAN/
-│   └── control
-├── usr/
-│   └── local/
-│       └── bin/
-│           └── snakegame.py
-```
--# Note: When you update the main snakegame.py, be sure to update snakegame_linux/usr/local/bin/snakegame.py too!
-
-3. Build the package:
-
-```bash
-dpkg-deb --build snakegame-linux
-```
-
-4. Install and test:
-
-```bash
-sudo dpkg -i snakegame-linux.deb
-snakegame.py
-```
-
----
+## Compiling / Building
 
 ### Windows (.exe)
 
-Dependencies:
+**Dependencies:** Python 3.8+, PyInstaller
 
-* Python 3.8+ installed
-* PyInstaller (`pip install pyinstaller`)
-
-Steps:
-
-1. Activate your Python virtual environment (optional):
+**Build for x64/x86:**
 
 ```powershell
+# Activate virtual environment
 venv\Scripts\activate
+
+# Build executable
+pyinstaller --onefile --windowed snakegame.py --name SnakeGame_x64
+pyinstaller --onefile --windowed snakegame.py --name SnakeGame_x86  # Optional, requires Python x86
 ```
 
-2. Build the executable:
-
-```bash
-pyinstaller --onefile --icon=icon.ico --noconsole snakegame.py
-```
-
-3. The `.exe` will appear in the `dist/` folder. You can distribute it directly.
+The executables will appear in the `dist/` folder.
 
 ---
 
-## Snap (Ubuntu, Debian, etc.)
+### macOS (.app / Executable)
 
-### Requirements:
+**Dependencies:** Python 3, PyInstaller
 
-You need `snapcraft` installed:
+**Build for x64/ARM64:**
+
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Build for Intel
+pyinstaller --onefile --windowed snakegame.py --name SnakeGame_mac_x64
+
+# Build for Apple Silicon
+pyinstaller --onefile --windowed snakegame.py --name SnakeGame_mac_arm64
+```
+
+---
+
+### Linux (.deb / .rpm / .tar.gz)
+
+**Dependencies:** Python 3, `dpkg-dev`, `rpm`, `tar`
+
+**.deb package (Debian/Ubuntu):**
+
+```bash
+chmod +x snakegame.py
+
+mkdir -p snakegame-linux/DEBIAN
+mkdir -p snakegame-linux/usr/local/bin
+cp snakegame.py snakegame-linux/usr/local/bin/snakegame
+
+# Create DEBIAN/control file (update package info)
+dpkg-deb --build snakegame-linux
+sudo dpkg -i snakegame-linux.deb
+```
+
+**.rpm package (Fedora/openSUSE/CentOS):**
+
+```bash
+mkdir -p rpm/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+mkdir -p rpm/SOURCES/snakegame-1.0.0
+cp snakegame.py rpm/SOURCES/snakegame-1.0.0/
+tar czvf rpm/SOURCES/snakegame-1.0.0.tar.gz -C rpm/SOURCES snakegame-1.0.0
+
+# Create rpm/SPECS/snakegame.spec
+rpmbuild --define "_topdir $(pwd)/rpm" -bb rpm/SPECS/snakegame.spec
+```
+
+**Generic tarball (.tar.gz):**
+
+```bash
+mkdir -p tarball/snakegame
+cp snakegame.py tarball/snakegame/
+cp -r support_portal tarball/snakegame/  # optional
+tar czf snakegame_1.0.0.tar.gz -C tarball snakegame
+```
+
+---
+
+### Snap (Optional)
+
+**Requirements:** Snapcraft
 
 ```bash
 sudo snap install snapcraft --classic
-```
-
-### Folder structure:
-
-Your repo should contain a file named **`snap/snapcraft.yaml`**
-
-### Build:
-
-In your project root:
-
-```bash
-snapcraft
-```
-
-This will create a file:
-
-```
-snakegame_1.0.0_amd64.snap
-```
-
-### Test locally:
-
-```bash
+snapcraft pack  # creates snakegame_1.0.0_amd64.snap
 sudo snap install snakegame_1.0.0_amd64.snap --dangerous
+snapcraft upload snakegame_1.0.0_amd64.snap --release=stable
 ```
-
-(`--dangerous` allows local testing of unsigned snaps)
-
-### Publish on Snap Store:
-
-1. Create a Snapcraft account: [https://snapcraft.io/account](https://snapcraft.io/account)
-2. Register your app name:
-
-   ```bash
-   snapcraft register snakegame
-   ```
-3. Upload:
-
-   ```bash
-   snapcraft upload snakegame_1.0.0_amd64.snap --release=stable
-   ```
 
 ---
 
-## Admin Panel
+### Flatpak (Optional)
 
-Use the admin panel to see the telemetries sent or push updates via internet.
+```bash
+sudo apt install flatpak flatpak-builder
+flatpak-builder build-dir snakegame.flatpak.yaml --force-clean
+flatpak build-bundle repo snakegame.flatpak com.c4l.SnakeGame 1.0.0
+```
+
+---
+
+### Notes
+
+* Windows x86 requires Python x86 installed.
+* macOS builds require a macOS runner / machine.
+* ARM builds may require ARM runners or cross-compilation.
+* Snap/Flatpak builds require their respective packaging files (`snapcraft.yaml` / `.flatpak.yaml`).
+
+---
+
+### Admin Panel
 
 Start a local server:
 
@@ -166,47 +154,25 @@ Start a local server:
 python3 -m http.server 8000
 ```
 
-To stop the server, press `Ctrl+C` on the terminal/cmd.
+---
 
-## Support Portal
-
-Run the Flask app to enable ticketing and telemetry:
+### Support Portal
 
 ```bash
 cd support_portal
-source venv/bin/activate  # activate your venv
+source venv/bin/activate
 pip install -r requirements.txt
 python app.py
 ```
 
-Then open your browser at `http://localhost:5000` to use the portal.
+Then open: [http://localhost:5000](http://localhost:5000)
 
 ---
 
-## Telemetry & Crash Reporting
+### Telemetry & Crash Reporting
 
-The game automatically detects crashes and offers to send **anonymous telemetry** to help improve the software.
-
-No personal information (IP, accounts, passwords) is collected.
+Anonymous telemetry is collected automatically. No personal information is stored.
 
 ---
-
-## Contributing
-
-Contributions are welcome! Please fork the repository, make your changes, and submit a pull request.
-
----
-
-## What do you need to host the software
-
-- Personal server (To host the support portal and admin panel)
-- WinSCP to host the server
-
-## Recommended actions
-- For logins: Use random usernames/password generators
-- Build an encrypted system
-
-I will update this repo more soon!
 
 By C4L
-:D
