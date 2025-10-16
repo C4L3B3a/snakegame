@@ -1,6 +1,6 @@
 # SnakeGame Developer Kit
 
-More of a developer kit for Python game developers.
+An developer kit for Python game developers.
 
 Includes:
 
